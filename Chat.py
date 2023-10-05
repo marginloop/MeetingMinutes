@@ -1,23 +1,38 @@
-
-import openai
+from gpt4all import GPT4All
 
 class Chat():
-    #openai.api_key = "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" # Remember to handle this securely
-    openai.api_base = "http://localhost:4891/v1"
 
-    def __init__(self) -> None:
-        self.model= "ggml-wizard-13b-uncensored"
+    @classmethod
+    def segment_text(cls, text, max_tokens=2048, overlap=50):
+        words = text.split()
+        segments = []
+        current_segment = []
 
+        for word in words:
+            if len(' '.join(current_segment + [word])) < max_tokens:
+                current_segment.append(word)
+            else:
+                segments.append(' '.join(current_segment))
+                current_segment = current_segment[-overlap:] + [word]
 
-    def chat(self, prompt):
-        response = openai.Completion.create(
-            model=self.model,
-            prompt=prompt,
-            max_tokens=50,
-            temperature=0.28,
-            top_p=0.95,
-            n=1,
-            echo=True,
-            stream=False
-        )
-        return response
+        if current_segment:
+            segments.append(' '.join(current_segment))
+
+        return segments
+
+    @classmethod
+    def chat(cls, systemPrompt, prompt):
+        model = GPT4All("orca-mini-3b.ggmlv3.q4_0.bin")
+
+        model.config['systemPrompt'] = systemPrompt
+
+        # If the prompt is short enough, process it directly
+        if len(prompt.split()) < 2048:
+            return model.generate(prompt, max_tokens=2048)
+        
+        # Otherwise, segment the prompt and process each segment
+        segments = cls.segment_text(prompt)
+        responses = [model.generate(segment, max_tokens=2048) for segment in segments]
+        
+        # Combine the responses
+        return ' '.join(responses)
