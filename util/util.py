@@ -5,7 +5,7 @@ from datetime import datetime
 class util:
 
     @classmethod
-    def transcription_status(cls, file_name, status, transcript=None):
+    def transcription_status(cls, file_name, status, transcript=None, meeting_minutes=None):
         # Load the current status data
         with open('data/transcription_status.json', 'r') as file:
             data = json.load(file)
@@ -17,13 +17,16 @@ class util:
                 item['date_processed'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 if transcript is not None:
                     item['transcript'] = transcript
+                if meeting_minutes is not None:
+                    item['transcript'] = transcript
                 break
         else:  # If the file wasn't found, add a new entry
             data.append({
                 'file_name': file_name,
                 'status': status,
                 'date_processed': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'transcript': transcript if transcript is not None else ''
+                'transcript': transcript if transcript is not None else '',
+                'meeting_minutes': meeting_minutes if meeting_minutes is not None else ''
             })
         
         # Save the updated status data
