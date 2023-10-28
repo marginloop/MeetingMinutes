@@ -17,4 +17,4 @@ class Chat():
                 }
             ]
         )
-        return response
+        return response['choices'][0]['message']['content']
