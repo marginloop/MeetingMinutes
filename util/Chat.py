@@ -2,8 +2,6 @@ import openai
 
 class Chat():
 
-
-
     @classmethod
     def chat(cls, system_prompt, prompt):
         response = openai.ChatCompletion.create(
