@@ -15,7 +15,7 @@ def process_audio_chunk(audio_chunk):
 
 def main():
     openai.api_key = util.read_open_api_key()
-    file_name = "data/WorkMeeting.m4a"
+    file_name = "data/WorkMeetingRatingAssignment.m4a"
     
     # Load the audio file
     audio = AudioSegment.from_file(file_name)
