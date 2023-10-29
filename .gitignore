@@ -3,3 +3,5 @@
 *.txt
 *.m4a
 __pycache__/*
+*/__pycache__/*
+data/transcription_status.json
