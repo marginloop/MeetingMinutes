@@ -4,7 +4,7 @@ from util.sumarizer import sumarizer
 
 
 openai.api_key = util.read_open_api_key()
-file_name = "data/Journal.m4a"
+file_name = "data/WorkMeeting.m4a"
 audio_file= open(file_name, "rb")
 
 transcript = openai.Audio.translate("whisper-1", audio_file)
