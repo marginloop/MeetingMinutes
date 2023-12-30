@@ -1,9 +1,10 @@
 import openai
 from pydub import AudioSegment
-from util.util import util
-from util.sumarizer import sumarizer
 import whisper
 import logging
+import argparse
+from util.util import util
+from util.sumarizer import sumarizer
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -28,31 +29,42 @@ def process_audio_chunk(audio_chunk, use_api=False):
         return transcript['text']
 
 def main():
-    logging.info("Starting the main process...")
-    openai.api_key = util.read_open_api_key()
-    file_name = "data/New Recording 14.m4a"
-    
-    # Load the audio file
-    logging.info(f"Loading audio file: {file_name}")
-    audio = AudioSegment.from_file(file_name)
-    audio = audio.set_frame_rate(16000).set_channels(1)  # Set to mono and 16kHz
-    audio.export("converted_file.wav", format="wav")
-    
-    # Split the audio file into chunks
-    chunk_length_ms = 10 * 60 * 1000  # 30 seconds in milliseconds
-    audio_chunks = [audio[i:i+chunk_length_ms] for i in range(0, len(audio), chunk_length_ms)]
-    logging.info(f"Split audio into {len(audio_chunks)} chunks.")
+    parser = argparse.ArgumentParser(description="Process audio recordings and generate transcripts.")
+    parser.add_argument("--load-transcript", help="Path to a saved combined transcript file", type=str)
+    args = parser.parse_args()
 
-    # Process each chunk and collect the transcripts
-    all_transcripts = []
-    for idx, audio_chunk in enumerate(audio_chunks):
-        logging.info(f"Processing chunk {idx + 1}/{len(audio_chunks)}...")
-        transcript = process_audio_chunk(audio_chunk)
-        all_transcripts.append(transcript)
-    
-    # Combine the transcripts from all chunks
-    combined_transcript = "\n".join(all_transcripts)
-    
+    file_name = "data/New Recording 18.m4a"
+
+    if args.load_transcript:
+        logging.info(f"Loading saved transcript from {args.load_transcript}")
+        with open(args.load_transcript, 'r') as file:
+            combined_transcript = file.read()
+    else:
+        logging.info("Starting the main process...")
+        openai.api_key = util.read_open_api_key()
+  
+        
+        # Load the audio file
+        logging.info(f"Loading audio file: {file_name}")
+        audio = AudioSegment.from_file(file_name)
+        audio = audio.set_frame_rate(16000).set_channels(1)  # Set to mono and 16kHz
+        audio.export("converted_file.wav", format="wav")
+        
+        # Split the audio file into chunks
+        chunk_length_ms = 10 * 60 * 1000  # 10 minutes in milliseconds
+        audio_chunks = [audio[i:i+chunk_length_ms] for i in range(0, len(audio), chunk_length_ms)]
+        logging.info(f"Split audio into {len(audio_chunks)} chunks.")
+
+        # Process each chunk and collect the transcripts
+        all_transcripts = []
+        for idx, audio_chunk in enumerate(audio_chunks):
+            logging.info(f"Processing chunk {idx + 1}/{len(audio_chunks)}...")
+            transcript = process_audio_chunk(audio_chunk)
+            all_transcripts.append(transcript)
+        
+        # Combine the transcripts from all chunks
+        combined_transcript = "\n".join(all_transcripts)
+
     # Generate the meeting minutes from the full transcript
     postprocessed_transcript = sumarizer.postprocessor(transcript=combined_transcript)
     meeting_minutes = sumarizer.meeting_minutes(transcription=postprocessed_transcript)

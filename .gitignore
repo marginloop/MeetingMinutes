@@ -6,3 +6,4 @@ __pycache__/*
 */__pycache__/*
 data/transcription_status.json
 *.wav
+config/config.json
