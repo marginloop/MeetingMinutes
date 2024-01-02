@@ -14,7 +14,7 @@ class util:
         for item in data:
             if item['file_name'] == file_name:
                 item['status'] = status
-                item['date_processed'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                item['date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 if transcript is not None:
                     item['transcript'] = transcript
                 if meeting_minutes is not None:
@@ -24,7 +24,7 @@ class util:
             data.append({
                 'file_name': file_name,
                 'status': status,
-                'date_processed': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 'transcript': transcript if transcript is not None else '',
                 'meeting_minutes': meeting_minutes if meeting_minutes is not None else ''
             })
